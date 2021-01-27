@@ -9,6 +9,7 @@
 # Kowaltowski, T.; CL. Lucchesi (1993), "Applications of finite automata representing large vocabularies",
 # Software-Practice and Experience 1993
 import sys
+import operator
 import time
 
 DICTIONARY = "dict.txt"
@@ -157,24 +158,6 @@ class Dawg:
             return "a substring ending in a white move with {0} line(s) containing it in the set".format(available)
         if node.final:
             return self.data[skipped]
-# my custom looks--------------------------------------------------------
-    def lookup2( self, word ):
-        node = self.root
-        wcount = 0
-        skipped = 0 # keep track of number of final nodes that we skipped
-        for letter in word:
-            if letter not in node.edges: return None
-            for label, child in sorted(node.edges.items()):
-                if label == letter:
-                    if node.final: skipped += 1
-                    node = child
-                    break
-                skipped += child.count
-        if node.numReachable() > 0:
-            print(node.numReachable())
-            print(node.edges)
-        if node.final:
-            return self.data[skipped]
 
     def nodeCount( self ):
         return len(self.minimizedNodes)
@@ -209,16 +192,22 @@ if 0:
 dawg = Dawg()
 WordCount = 0
 words = open(DICTIONARY, "rt").read().split()
-words.sort()
-print(words)
+
+linedict = {}
+
+with open("dict.txt", 'r') as sicdefs:
+    for line in sicdefs:
+        sic = line.split('X')
+        moves, name = sic[0], sic[1].strip()
+        linedict[name] = moves
+        print(name, moves)
+
+linedict = sorted(linedict.items(), key=operator.itemgetter(1))
+
 start = time.time()
-for word in words:
-    word = word.split('X')
+for key, value in linedict:
     WordCount += 1
-    # insert all words, using the reversed version as the data associated with
-    # it
-    # dawg.insert(word, ''.join(reversed(word)))
-    dawg.insert(word[0], word[1])
+    dawg.insert(value, key)
     if ( WordCount % 100 ) == 0: print("{0}\r".format(WordCount), end="")
 dawg.finish()
 print("Dawg creation took {0} s".format(time.time()-start))
