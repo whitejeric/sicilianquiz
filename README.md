@@ -1,6 +1,6 @@
 ## sicilianquiz
 
-a project to better learn using directed acyclic word graphs and memorize some sicilian defence variations
+a roundabout way to better my understanding of directed acyclic word graphs so i can create an implementation of a late 80's [scrabble solving algorithm](https://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf)
 
 ### plan
 repurpose the dawg implementation [by Steve Hanov](http://stevehanov.ca/blog/index.php?id=115) to accept words as algebraic lines of the defence to quiz myself <br/>
