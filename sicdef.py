@@ -11,9 +11,11 @@
 import sys
 import operator
 import time
+from niceLine import toRow, toCols
 
-DICTIONARY = "dict.txt"
-QUERY = sys.argv[1:]
+# DICTIONARY = "dict.txt"
+# QUERY = sys.argv[1:] +'We4Vc5Wnf3Vnc6Wd4X We4Vc5Wnf3Ve6Wd4X We4Vc5Wnf3Vd6Wd4X We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3VNc6X We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3Va6X'
+
 
 # This class represents a node in the directed acyclic word graph (DAWG). It
 # has a list of edges to other nodes. It has functions for testing whether it
@@ -86,7 +88,7 @@ class Dawg:
         if word <= self.previousWord:
             raise Exception("Error: Words must be inserted in alphabetical " +
                 "order.")
-
+        # print("Inserting: " + word +"Previous: "+ self.previousWord)
         # find common prefix between word and previous word
         commonPrefix = 0
         for i in range( min( len( word ), len( self.previousWord ) ) ):
@@ -96,7 +98,7 @@ class Dawg:
         # Check the uncheckedNodes for redundant nodes, proceeding from last
         # one down to the common prefix size. Then truncate the list at that
         # point.
-        self._minimize( commonPrefix + 1 )
+        self._minimize( commonPrefix )
 
         self.data.append(data)
 
@@ -116,7 +118,6 @@ class Dawg:
             if letter == 'V':
                 node.wMove = True #node has an edge to a black move in the set
             node = nextNode
-
         node.final = True
         self.previousWord = word
 
@@ -143,7 +144,8 @@ class Dawg:
         node = self.root
         skipped = 0 # keep track of number of final nodes that we skipped
         for letter in word:
-            if letter not in node.edges: return None
+            if letter not in node.edges:
+                return None
             for label, child in sorted(node.edges.items()):
                 if label == letter:
                     if node.final:
@@ -152,12 +154,15 @@ class Dawg:
                     break
                 skipped += child.count
         available = node.numReachable()
-        if node.bMove:
-            return "a substring ending in a black move with {0} line(s) containing it in the set".format(available)
-        if node.wMove:
-            return "a substring ending in a white move with {0} line(s) containing it in the set".format(available)
         if node.final:
             return self.data[skipped]
+        if node.bMove:
+            return "a substring ending in a black move with {0} line(s) containing it in the set".format(available)
+            #make a system for complete lines that are also sublines
+            #ie basic open is only 4 moves long, give it 50% chance of just ending?
+        if node.wMove:
+            return "a substring ending in a white move with {0} line(s) containing it in the set".format(available)
+
 
     def nodeCount( self ):
         return len(self.minimizedNodes)
@@ -190,19 +195,22 @@ if 0:
     sys.exit()
 
 dawg = Dawg()
+DICTIONARY = "dictchess.txt"
 WordCount = 0
-words = open(DICTIONARY, "rt").read().split()
+# words = open(DICTIONARY, "rt").read().split()
 
 linedict = {}
-
-with open("dict.txt", 'r') as sicdefs:
+QUERY = {}
+name = 0
+with open(DICTIONARY, 'rt') as sicdefs:
     for line in sicdefs:
         sic = line.split('X')
         moves, name = sic[0], sic[1].strip()
         linedict[name] = moves
-        print(name, moves)
 
-linedict = sorted(linedict.items(), key=operator.itemgetter(1))
+linedict = sorted(linedict.items(), key=operator.itemgetter(1)) #sort by moves, not line name
+QUERY = linedict
+print(linedict)
 
 start = time.time()
 for key, value in linedict:
@@ -218,10 +226,17 @@ print("Read {0} words into {1} nodes and {2} edges".format(
 
 print("This could be stored in as little as {0} bytes".format(EdgeCount * 4))
 
-for word in QUERY:
+QUERY.append(('(test)','We4Vc5Wnf3'))
+for name, word in QUERY:
     result = dawg.lookup(word)
+    cWord = word.replace('W', ' ').replace('V', ' ')
+    cResult = result.replace('(', '').replace(')', '')
+    print("Q:  {0} aka the {1}".format(word, name))
     if result == None:
-        print("{0} not in dictionary.".format(word))
+        print("A: {0} not in dictionary.".format(cWord))
+    # elif result == name: #making super sure
     else:
-        print("{0} is in the dictionary and is {1}".format(word, result))
+        print("A: {0} is in the dictionary as the {1}".format(cWord, cResult))
+
+# print dawg.lookup('We4Vc5Wnf3')
 # dawg.display()
