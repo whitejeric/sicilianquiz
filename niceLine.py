@@ -34,5 +34,6 @@ def toRow(WVXLine, name=''):
     return niceRow
 
 if 0:
-    print(toCols('We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3X(Open_Classical)'))
-    print(toRow('We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3X(Open_Classical)'))
+    return
+# print(toCols('We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3X', '(Open_Classical)'))
+# print(toRow('We4Vc5Wnf3Vd6Wd4Vcxd4Wnxd4Vnf6Wnc3X(Open_Classical)'))

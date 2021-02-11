@@ -11,6 +11,7 @@
 import sys
 import operator
 import time
+from whiteMoves import whiteMoves
 from niceLine import toRow, toCols
 
 # DICTIONARY = "dict.txt"
@@ -185,6 +186,10 @@ class Dawg:
                 print("    {} goto {}".format(label, child.id))
                 stack.append(child)
 
+    def whiteMove(self, line):
+        return 0
+
+
 if 0:
     dawg = Dawg()
     dawg.insert("cat", 0)
@@ -195,6 +200,7 @@ if 0:
     sys.exit()
 
 dawg = Dawg()
+compMoves = whiteMoves()
 DICTIONARY = "dictchess.txt"
 WordCount = 0
 # words = open(DICTIONARY, "rt").read().split()
@@ -205,17 +211,19 @@ name = 0
 with open(DICTIONARY, 'rt') as sicdefs:
     for line in sicdefs:
         sic = line.split('X')
-        moves, name = sic[0], sic[1].strip()
+        moves, name = sic[0] + 'X', sic[1].strip()
         linedict[name] = moves
+        compMoves.insertLine(moves)
 
 linedict = sorted(linedict.items(), key=operator.itemgetter(1)) #sort by moves, not line name
 QUERY = linedict
 print(linedict)
 
+
 start = time.time()
-for key, value in linedict:
+for name, moves in linedict:
     WordCount += 1
-    dawg.insert(value, key)
+    dawg.insert(moves, name)
     if ( WordCount % 100 ) == 0: print("{0}\r".format(WordCount), end="")
 dawg.finish()
 print("Dawg creation took {0} s".format(time.time()-start))
@@ -226,17 +234,53 @@ print("Read {0} words into {1} nodes and {2} edges".format(
 
 print("This could be stored in as little as {0} bytes".format(EdgeCount * 4))
 
-QUERY.append(('(test)','We4Vc5Wnf3'))
+
+QUERY.append(('(test)','We4Vc5WNf3')) #semi complete test case
+
+#ensure all lines have been properly inserted into the dawg
 for name, word in QUERY:
     result = dawg.lookup(word)
-    cWord = word.replace('W', ' ').replace('V', ' ')
-    cResult = result.replace('(', '').replace(')', '')
     print("Q:  {0} aka the {1}".format(word, name))
     if result == None:
-        print("A: {0} not in dictionary.".format(cWord))
+        print("A: {0} not in dictionary.\n".format(toRow(word)))
     # elif result == name: #making super sure
     else:
-        print("A: {0} is in the dictionary as the {1}".format(cWord, cResult))
+        if word[:-1] != 'X': #to test semi complete lines as queries
+            word += 'X'
+        cResult = result.replace('(', '').replace(')', '')
+        print("A: {0} is in the dictionary as the {1}\n".format(toRow(word), result))
 
 # print dawg.lookup('We4Vc5Wnf3')
 # dawg.display()
+read = 'W'
+temp = ''
+black = False #true when it is blacks turn
+quit = False
+print(compMoves)
+while quit != True:
+    temp = input('Enter a move: ')
+    if temp == 'q':
+        break
+    result = dawg.lookup(read+temp)
+    if result == None:
+        print("A: {0} not in dictionary.".format(read+temp))
+        temp = ''
+    else:
+        print("A: {0} is in the dictionary as the {1}".format(read+temp, result))
+        result = None
+        if black == False:
+            read += temp + 'V'
+            black = True #now its blacks turn
+        else:
+            read += temp + 'W'
+            black = False #whites turn
+        # while black == False:
+        #     temp = input('Enter a black move: ')
+        #     result = dawg.lookup(read+temp)
+        #     if result == None:
+        #         print("A: {0} not in dictionary.".format(read+temp))
+        #         temp = ''
+        #     else:
+        #         print("A: {0} is in the dictionary as the {1}".format(read+temp, result))
+        #         read += temp + 'W'
+        #         black = True
