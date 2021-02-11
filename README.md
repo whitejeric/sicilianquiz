@@ -24,6 +24,6 @@ quiz the user to name the line through multiple choice
    - ~~test partial strings given one opening~~
    - ~~implement functions in the dawg for partial lines and test with multiple openings~~
    - create a system for randomizing the computers moves 
-   - add rest of the variations
-   - build class for game without quiz
+   - ~~add rest of the variations~~
+   - ~~build class for game without quiz~~
    - build quiz
